@@ -1,35 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Modern Order Page</title>
-    <script src="https://js.stripe.com/v3/"></script>
-    <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 50px; background: #f9f9f9; }
-        .product-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-        .btn { background: #635bff; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
-        .btn:hover { background: #4b45cc; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmarterEdge AI - Solutions</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3rem;
+    }
+
+    .accent { color: #6366f1; }
+
+    /* Product Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: left;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      border-color: #6366f1;
+      transform: translateY(-5px);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .product-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .product-desc {
+      font-size: 0.9rem;
+      color: #888;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .price-tag {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: block;
+      padding: 12px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-add {
+      background: #6366f1;
+      color: white;
+      border: none;
+    }
+
+    .btn-add:hover { background: #4f46e5; }
+
+    .btn-back {
+      display: inline-block;
+      color: #888;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 24px;
+      margin-top: 2rem;
+    }
+
+    .btn-back:hover { color: #fff; border-color: #fff; }
+
+    /* Notification Toast */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #6366f1;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
-    <div class="product-card">
-        <img src="https://via.placeholder.com/150" alt="Product" style="border-radius: 8px; margin-bottom: 1rem;">
-        <h2>Premium Access</h2>
-        <p style="color: #666;">$29.00 USD / one-time</p>
-        <button id="checkout-button" class="btn">Proceed to Payment</button>
+
+  <div class="container">
+    <div class="label">SmarterEdge AI</div>
+    <h1>Select your <span class="accent">Plan</span></h1>
+
+    <div class="grid">
+      <div class="product-card">
+        <div class="product-name">Standard Edge</div>
+        <p class="product-desc">Advanced AI analytics with real-time processing for smaller datasets.</p>
+        <div class="price-tag">$29.00</div>
+        <button class="btn btn-add" onclick="addToCart('Standard Edge', 29.00)">Add to Cart</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-name">Pro Intelligence</div>
+        <p class="product-desc">Full neural network access with dedicated processing and 24/7 support.</p>
+        <div class="price-tag">$79.00</div>
+        <button class="btn btn-add" onclick="addToCart('Pro Intelligence', 79.00)">Add to Cart</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-name">Enterprise Node</div>
+        <p class="product-desc">Custom-built architecture for global scale and high-frequency tasks.</p>
+        <div class="price-tag">$199.00</div>
+        <button class="btn btn-add" onclick="addToCart('Enterprise Node', 199.00)">Add to Cart</button>
+      </div>
     </div>
 
-    <script>
-        const checkoutButton = document.getElementById('checkout-button');
-        checkoutButton.addEventListener('click', async () => {
-            // Call your backend to create a Checkout Session
-            const response = await fetch('/create-checkout-session', { method: 'POST' });
-            const session = await response.json();
-            
-            // Redirect to Stripe Checkout
-            const stripe = Stripe('your_publishable_key_here');
-            stripe.redirectToCheckout({ sessionId: session.id });
-        });
-    </script>
+    <a href="index.html" class="btn btn-back">← Back to Dashboard</a>
+  </div>
+
+  <div id="toast">Added to cart!</div>
+
+  <script>
+    function addToCart(name, price) {
+      let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+      
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ name: name, price: price, qty: 1 });
+      }
+      
+      localStorage.setItem('shoppingCart', JSON.stringify(cart));
+      
+      // Show Toast
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+  </script>
 </body>
 </html>
