@@ -3,168 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmarterEdge AI - Solutions</title>
+  <title>SmarterEdge AI - Diagnostic Solutions</title>
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       min-height: 100vh;
-      background: #0a0a0a;
-      color: #f0f0f0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      padding: 40px 20px;
+      background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 60px 20px;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       text-align: center;
     }
 
     .label {
       font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
+      font-weight: 700;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #888;
+      color: #64748b;
       margin-bottom: 1rem;
     }
 
     h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 3rem;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 3.5rem;
     }
 
-    .accent { color: #6366f1; }
+    .accent { color: #2563eb; } /* Medical Blue */
 
     /* Product Grid */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-bottom: 3rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+      margin-bottom: 4rem;
     }
 
     .product-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 2.5rem;
       text-align: left;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     .product-card:hover {
-      border-color: #6366f1;
-      transform: translateY(-5px);
-      background: rgba(99, 102, 241, 0.05);
+      border-color: #14b8a6; /* Teal border on hover */
+      transform: translateY(-8px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
     .product-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #0f172a;
     }
 
     .product-desc {
-      font-size: 0.9rem;
-      color: #888;
-      line-height: 1.5;
-      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 2rem;
       flex-grow: 1;
     }
 
     .price-tag {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #0f172a;
       margin-bottom: 1.5rem;
+      display: flex;
+      align-items: baseline;
+    }
+
+    .price-tag span {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-left: 4px;
+      font-weight: 500;
     }
 
     /* Buttons */
     .btn {
-      display: block;
-      padding: 12px;
+      display: inline-block;
       text-align: center;
       text-decoration: none;
-      border-radius: 10px;
-      font-weight: 600;
+      border-radius: 14px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
+      border: none;
+      font-size: 1rem;
     }
 
     .btn-add {
-      background: #6366f1;
+      width: 100%;
+      padding: 16px;
+      background: #2563eb;
       color: white;
-      border: none;
     }
 
-    .btn-add:hover { background: #4f46e5; }
+    .btn-add:hover {
+      background: #1d4ed8;
+      box-shadow: 0 8px 15px rgba(37, 99, 235, 0.2);
+    }
 
     .btn-back {
-      display: inline-block;
-      color: #888;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px 24px;
+      background: #ffffff;
+      color: #64748b;
+      border: 2px solid #e2e8f0;
+      padding: 12px 32px;
       margin-top: 2rem;
     }
 
-    .btn-back:hover { color: #fff; border-color: #fff; }
-
-    /* Notification Toast */
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #6366f1;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      display: none;
-      animation: fadeIn 0.3s;
+    .btn-back:hover {
+      color: #0f172a;
+      border-color: #0f172a;
     }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* Success Toast - Medical Teal */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #14b8a6;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 16px;
+      display: none;
+      box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+      z-index: 1000;
+      font-weight: 600;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="label">SmarterEdge AI</div>
-    <h1>Select your <span class="accent">Plan</span></h1>
+    <div class="label">SmarterEdge AI — Solutions</div>
+    <h1>Deploy AI <span class="accent">Diagnostics</span></h1>
 
     <div class="grid">
       <div class="product-card">
-        <div class="product-name">Standard Edge</div>
-        <p class="product-desc">Advanced AI analytics with real-time processing for smaller datasets.</p>
-        <div class="price-tag">$29.00</div>
-        <button class="btn btn-add" onclick="addToCart('Standard Edge', 29.00)">Add to Cart</button>
+        <div class="product-name">Clinical Edge</div>
+        <p class="product-desc">Optimized for individual clinics. Real-time patient data analysis and automated reporting.</p>
+        <div class="price-tag">$29.00<span>/mo</span></div>
+        <button class="btn btn-add" onclick="addToCart('Clinical Edge', 29.00)">Add to Requisition</button>
       </div>
 
       <div class="product-card">
-        <div class="product-name">Pro Intelligence</div>
-        <p class="product-desc">Full neural network access with dedicated processing and 24/7 support.</p>
-        <div class="price-tag">$79.00</div>
-        <button class="btn btn-add" onclick="addToCart('Pro Intelligence', 79.00)">Add to Cart</button>
+        <div class="product-name">System Intelligence</div>
+        <p class="product-desc">Advanced neural mapping for multi-department hospitals. Includes priority technical triage.</p>
+        <div class="price-tag">$79.00<span>/mo</span></div>
+        <button class="btn btn-add" onclick="addToCart('System Intelligence', 79.00)">Add to Requisition</button>
       </div>
 
       <div class="product-card">
-        <div class="product-name">Enterprise Node</div>
-        <p class="product-desc">Custom-built architecture for global scale and high-frequency tasks.</p>
-        <div class="price-tag">$199.00</div>
-        <button class="btn btn-add" onclick="addToCart('Enterprise Node', 199.00)">Add to Cart</button>
+        <div class="product-name">Network Node</div>
+        <p class="product-desc">Full-scale health network integration. Custom architecture for population health data.</p>
+        <div class="price-tag">$199.00<span>/mo</span></div>
+        <button class="btn btn-add" onclick="addToCart('Network Node', 199.00)">Add to Requisition</button>
       </div>
     </div>
 
-    <a href="index.html" class="btn btn-back">← Back to Dashboard</a>
+    <a href="index.html" class="btn btn-back">← Return to Portal</a>
   </div>
 
-  <div id="toast">Added to cart!</div>
+  <div id="toast">Item added to requisition</div>
 
   <script>
     function addToCart(name, price) {
@@ -178,11 +208,15 @@
       }
       
       localStorage.setItem('shoppingCart', JSON.stringify(cart));
-      
-      // Show Toast
+      showToast();
+    }
+
+    function showToast() {
       const toast = document.getElementById('toast');
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
     }
   </script>
 </body>
