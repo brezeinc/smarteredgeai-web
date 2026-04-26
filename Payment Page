@@ -1,26 +1,179 @@
-const stripe = require('stripe')('your_secret_key_here');
-const express = require('express');
-const app = express();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmarterEdge AI - Secure Checkout</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-app.post('/create-checkout-session', async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: { name: 'Premium Access' },
-          unit_amount: 2900, // $29.00 in cents
-        },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: 'https://yourwebsite.com/success',
-    cancel_url: 'https://yourwebsite.com/cancel',
-  });
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-  res.json({ id: session.id });
-});
+    .container {
+      width: 100%;
+      max-width: 500px;
+      padding: 3rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
 
-app.listen(4242, () => console.log('Server running on port 4242'));
+    .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 1rem;
+    }
+
+    h1 { font-size: 2rem; margin-bottom: 2rem; }
+
+    /* Review Box */
+    .review-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .line-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      color: #aaa;
+    }
+
+    .grand-total {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 15px;
+      margin-top: 15px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      color: #fff;
+    }
+
+    .btn-stripe {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-stripe:hover {
+      background: #4f46e5;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-stripe:disabled {
+      background: #333;
+      cursor: not-allowed;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: #666;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="label">Secure Transaction</div>
+    <h1>Final <span style="color: #6366f1;">Review</span></h1>
+
+    <div id="review-list" class="review-box">
+      </div>
+
+    <button id="checkout-button" class="btn-stripe">Pay with Stripe</button>
+    <a href="index.html" class="back-link">Modify Order</a>
+  </div>
+
+  <script>
+    // Initialize Stripe (Replace with your actual Public Key)
+    const stripe = Stripe('pk_test_your_key_here');
+    const checkoutButton = document.getElementById('checkout-button');
+    const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+
+    function renderReview() {
+      const container = document.getElementById('review-list');
+      if (cart.length === 0) {
+        container.innerHTML = "<p>Your cart is empty.</p>";
+        checkoutButton.disabled = true;
+        return;
+      }
+
+      let total = 0;
+      let html = "";
+      cart.forEach(item => {
+        html += `
+          <div class="line-item">
+            <span>${item.name} x${item.qty}</span>
+            <span>$${(item.price * item.qty).toFixed(2)}</span>
+          </div>`;
+        total += item.price * item.qty;
+      });
+
+      html += `
+        <div class="grand-total">
+          <span>Total</span>
+          <span>$${total.toFixed(2)}</span>
+        </div>`;
+      
+      container.innerHTML = html;
+    }
+
+    checkoutButton.addEventListener('click', async () => {
+      checkoutButton.innerText = "Processing...";
+      checkoutButton.disabled = true;
+
+      // 1. Send the cart to your backend
+      const response = await fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cart })
+      });
+
+      const session = await response.json();
+
+      // 2. Redirect to Stripe Checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        alert(result.error.message);
+        checkoutButton.disabled = false;
+        checkoutButton.innerText = "Pay with Stripe";
+      }
+    });
+
+    renderReview();
+  </script>
+</body>
+</html>
